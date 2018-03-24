@@ -17,6 +17,17 @@ import java.util.logging.Logger;
 public class Ring {
     private static final Logger log = Logger.getLogger(Ring.class.getName());
 
+    @ThreadSafe
+    public class EventListener {
+        public void onNodeJoin(Node node) {
+            Ring.this.addNode(node);
+        }
+
+        public void onNodeLeave(Node node) {
+            Ring.this.removeNode(node);
+        }
+    }
+
     private final List<Node> nodes = Lists.newArrayList();
     private final Set<Integer> takenBuckets = Sets.newHashSet();
 
@@ -47,5 +58,9 @@ public class Ring {
             }
         }
         return nodes.get(nodes.size() - 1);
+    }
+
+    public EventListener newEventListener() {
+        return new EventListener();
     }
 }

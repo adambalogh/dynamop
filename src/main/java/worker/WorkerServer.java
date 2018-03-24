@@ -1,16 +1,13 @@
 package worker;
 
-import com.google.common.collect.Lists;
-import com.orbitz.consul.model.catalog.CatalogService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import worker.discovery.ConsulClient;
+import worker.discovery.EventListenerAdapter;
 import worker.discovery.ServiceWatcher;
-import worker.ring.Node;
 import worker.ring.Ring;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -32,16 +29,14 @@ public class WorkerServer {
     private final ConsulClient consulClient;
     private final ServiceWatcher serviceWatcher;
     private final Thread serviceWatcherThread;
+    private final Ring ring = new Ring();
 
-    public WorkerServer(int port, ConsulClient consulClient) {
+    public WorkerServer(int port) {
         this.port = port;
-        this.consulClient = consulClient;
-
-        this.workerService = new WorkerService(serviceId, new Ring());
-
+        this.consulClient = new ConsulClient();
+        this.workerService = new WorkerService(serviceId, ring);
         this.serviceWatcher = new ServiceWatcher(
-                SERVICE_NAME,
-                new ServiceWatcherCallback(workerService.getServiceDiscoveryListener()));
+                SERVICE_NAME, new EventListenerAdapter(ring.newEventListener()));
         this.serviceWatcherThread = new Thread(this.serviceWatcher);
     }
 
@@ -84,41 +79,10 @@ public class WorkerServer {
         }
     }
 
-    private class ServiceWatcherCallback implements ServiceWatcher.Callback {
-        private final WorkerService.ServiceDiscoveryListener listener;
-
-        private final List<Node> lastNodesAlive = Lists.newArrayList();
-
-        public ServiceWatcherCallback(WorkerService.ServiceDiscoveryListener listener) {
-            this.listener = listener;
-        }
-
-        public void onServices(List<CatalogService> services) {
-            List<Node> currentNodesAlive = Lists.newArrayList();
-
-            for (CatalogService service : services) {
-                Node node = new Node(service.getServiceAddress(), service.getServicePort(), service.getServiceId());
-                currentNodesAlive.add(node);
-                if (!lastNodesAlive.contains(node)) {
-                    listener.onNodeJoin(node);
-                }
-            }
-
-            for (Node node : lastNodesAlive) {
-                if (!currentNodesAlive.contains(node)) {
-                    listener.onNodeLeave(node);
-                }
-            }
-
-            lastNodesAlive.clear();
-            lastNodesAlive.addAll(currentNodesAlive);
-        }
-    }
-
     public static void main(String[] args) throws IOException, InterruptedException {
         int port = Integer.parseInt(args[0]);
-        ConsulClient consulClient = new ConsulClient();
-        final WorkerServer server = new WorkerServer(port, consulClient);
+        final WorkerServer server = new WorkerServer(port);
+
         server.start();
         server.blockUntilShutdown();
     }

@@ -3,7 +3,6 @@ package worker;
 import com.google.common.collect.Maps;
 import io.grpc.stub.StreamObserver;
 import worker.grpc.*;
-import worker.ring.Node;
 import worker.ring.Ring;
 
 import java.util.Map;
@@ -41,19 +40,5 @@ public class WorkerService extends WorkerGrpc.WorkerImplBase {
 
         responseStream.onNext(builder.build());
         responseStream.onCompleted();
-    }
-
-    public ServiceDiscoveryListener getServiceDiscoveryListener() {
-        return new ServiceDiscoveryListener();
-    }
-
-    public class ServiceDiscoveryListener {
-        public void onNodeJoin(Node node) {
-            ring.addNode(node);
-        }
-
-        public void onNodeLeave(Node node) {
-            ring.removeNode(node);
-        }
     }
 }

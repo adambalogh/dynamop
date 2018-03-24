@@ -23,19 +23,9 @@ public class ServiceWatcher implements Runnable {
 
     private class ServiceFetchTask extends TimerTask {
         @Override
-        public boolean cancel() {
-            return true;
-        }
-
-        @Override
         public void run() {
             ConsulResponse<List<CatalogService>> response = catalogClient.getService(serviceToWatch);
             callback.onServices(response.getResponse());
-        }
-
-        @Override
-        public long scheduledExecutionTime() {
-            return 0;
         }
     }
 
