@@ -22,13 +22,13 @@ public class RoutingWorkerService extends WorkerGrpc.WorkerImplBase {
     private final Ring ring;
 
     private final WorkerService workerImpl;
-    private final Map<String, WorkerGrpc.WorkerStub> futureStubs;
+    private final Map<String, WorkerGrpc.WorkerStub> asyncStubs;
 
     public RoutingWorkerService(String serviceId, Ring ring, WorkerService workerImpl) {
         this.serviceId = serviceId;
         this.ring = ring;
         this.workerImpl = workerImpl;
-        this.futureStubs = Maps.newConcurrentMap();
+        this.asyncStubs = Maps.newConcurrentMap();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class RoutingWorkerService extends WorkerGrpc.WorkerImplBase {
     }
 
     private WorkerGrpc.WorkerStub getStub(Node node) {
-        return futureStubs.computeIfAbsent(node.serviceId, (requestedServiceId) -> {
+        return asyncStubs.computeIfAbsent(node.serviceId, (requestedServiceId) -> {
             logger.info("Connecting to service: " + node.serviceId);
             return WorkerGrpc.newStub(ManagedChannelBuilder.forAddress(node.url, node.port)
                 // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid

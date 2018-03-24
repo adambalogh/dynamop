@@ -41,6 +41,13 @@ public class RingTests {
     }
 
     @Test
+    public void testRemove() {
+        ring.addNode(FIRST_NODE);
+        ring.removeNode(FIRST_NODE);
+        ring.addNode(FIRST_NODE);
+    }
+
+    @Test
     public void throwsWhenBucketAlreadyOccupied() {
         ring.addNode(FIRST_NODE);
         try {

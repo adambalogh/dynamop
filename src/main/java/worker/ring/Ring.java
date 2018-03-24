@@ -41,14 +41,9 @@ public class Ring {
     }
 
     public synchronized void removeNode(Node node) {
-        for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).serviceId == node.serviceId) {
-                log.info("Node leaving the ring: " + node.serviceId);
-                nodes.remove(i);
-                takenBuckets.remove(node.bucket);
-                break;
-            }
-        }
+        log.info("Node leaving the ring: " + node.serviceId);
+        nodes.remove(node);
+        takenBuckets.remove(node.bucket);
     }
 
     public synchronized Node getAssignedNode(int bucket) {
