@@ -32,7 +32,6 @@ public class WorkerServer {
     private final RoutingWorkerService workerService;
     private final ConsulClient consulClient;
     private final ServiceWatcher serviceWatcher;
-    private final Thread serviceWatcherThread;
     private final Ring ring = new Ring();
 
     private final HealthCheckService healthCheckService;
@@ -45,7 +44,6 @@ public class WorkerServer {
                 consul,
                 SERVICE_NAME,
                 new EventListenerAdapter(ring.newEventListener()));
-        this.serviceWatcherThread = new Thread(this.serviceWatcher);
         this.healthCheckService = new HealthCheckService();
     }
 
@@ -60,8 +58,8 @@ public class WorkerServer {
         consulClient.register(port, SERVICE_NAME, serviceId);
         logger.info("Server registered with Consul");
 
-        this.serviceWatcherThread.start();
-        logger.info("Started service watcher thread");
+        this.serviceWatcher.run();
+        logger.info("Started service watcher");
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

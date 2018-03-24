@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * Created by adambalogh.
  */
 public class ConsulClient {
-    private static final Logger log = Logger.getLogger(ServiceWatcher.class.getName());
+    private static final Logger log = Logger.getLogger(ConsulClient.class.getName());
 
     private final AgentClient agentClient;
 

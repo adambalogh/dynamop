@@ -44,6 +44,9 @@ public class ServiceWatcher implements Runnable {
         this.callback = callback;
     }
 
+    /*
+     * Starts watching the given in a background thread. This method returns immediately.
+     */
     public void run() {
         Timer timer = new Timer("ServiceWatcher timer");
         ServiceFetchTask serviceFetchTask = new ServiceFetchTask();
