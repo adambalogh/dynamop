@@ -2,10 +2,12 @@ package worker;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import worker.core.WorkerService;
 import worker.discovery.ConsulClient;
-import worker.ring.EventListenerAdapter;
 import worker.discovery.ServiceWatcher;
+import worker.ring.EventListenerAdapter;
 import worker.ring.Ring;
+import worker.routing.RoutingWorkerService;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -24,7 +26,7 @@ public class WorkerServer {
     private final int port;
     private final String serviceId = UUID.randomUUID().toString();
 
-    private final WorkerService workerService;
+    private final RoutingWorkerService workerService;
 
     private final ConsulClient consulClient;
     private final ServiceWatcher serviceWatcher;
@@ -34,7 +36,7 @@ public class WorkerServer {
     public WorkerServer(int port) {
         this.port = port;
         this.consulClient = new ConsulClient();
-        this.workerService = new WorkerService(serviceId, ring);
+        this.workerService = new RoutingWorkerService(serviceId, ring, new WorkerService());
         this.serviceWatcher = new ServiceWatcher(
                 SERVICE_NAME, new EventListenerAdapter(ring.newEventListener()));
         this.serviceWatcherThread = new Thread(this.serviceWatcher);
@@ -47,7 +49,7 @@ public class WorkerServer {
                 .start();
         logger.info("Server started, listening on " + port);
 
-        consulClient.register(port, SERVICE_NAME, UUID.randomUUID().toString());
+        consulClient.register(port, SERVICE_NAME, serviceId);
         logger.info("Server registered with Consul");
 
         logger.info("Starting service watcher");

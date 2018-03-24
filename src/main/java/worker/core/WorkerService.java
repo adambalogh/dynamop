@@ -1,23 +1,14 @@
-package worker;
+package worker.core;
 
 import com.google.common.collect.Maps;
 import io.grpc.stub.StreamObserver;
 import worker.grpc.*;
-import worker.ring.Ring;
 
 import java.util.Map;
 import java.util.Optional;
 
 public class WorkerService extends WorkerGrpc.WorkerImplBase {
     private final Map<String, String> storage = Maps.newConcurrentMap();
-
-    private final String serviceId; // unique identifier accross all worker nodes
-    private final Ring ring;
-
-    public WorkerService(String serviceId, Ring ring) {
-        this.serviceId = serviceId;
-        this.ring = ring;
-    }
 
     @Override
     public void get(GetRequest request, StreamObserver<GetResponse> responseStream) {

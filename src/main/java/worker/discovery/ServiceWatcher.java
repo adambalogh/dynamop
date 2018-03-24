@@ -44,7 +44,7 @@ public class ServiceWatcher implements Runnable {
         Timer timer = new Timer("ServiceWatcher timer");
         ServiceFetchTask serviceFetchTask = new ServiceFetchTask();
         log.info("Starting ServiceWatcher timer thread");
-        timer.scheduleAtFixedRate(serviceFetchTask, 0l, TimeUnit.SECONDS.toMillis(3));
+        timer.scheduleAtFixedRate(serviceFetchTask, 0l, TimeUnit.SECONDS.toMillis(5));
         log.info("Finishing ServiceWatcher timer thread");
     }
 }

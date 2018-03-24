@@ -2,6 +2,8 @@ package worker.ring;
 
 import com.google.common.base.MoreObjects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by adambalogh.
  */
@@ -12,9 +14,9 @@ public class Node implements Comparable<Node> {
     public final int bucket;
 
     public Node(String url, int port, String serviceId) {
-        this.url = url;
+        this.url = checkNotNull(url, "url");
         this.port = port;
-        this.serviceId = serviceId;
+        this.serviceId = checkNotNull(serviceId, "serviceId");
         this.bucket = ConsistentHash.getBucket(serviceId);
     }
 

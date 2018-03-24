@@ -69,7 +69,8 @@ public class Client {
     }
 
     public static void main(String[] args) throws Exception {
-        Client client = new Client("localhost", 50051);
+        int port = Integer.parseInt(args[0]);
+        Client client = new Client("localhost", port);
         Scanner scanner = new Scanner(System.in);
         try {
 
