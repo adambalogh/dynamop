@@ -58,7 +58,7 @@ public class WorkerServer {
         consulClient.register(port, SERVICE_NAME, serviceId);
         logger.info("Server registered with Consul");
 
-        this.serviceWatcher.run();
+        serviceWatcher.start();
         logger.info("Started service watcher");
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -76,6 +76,7 @@ public class WorkerServer {
         if (server != null) {
             server.shutdown();
         }
+        serviceWatcher.stop();
     }
 
     /**

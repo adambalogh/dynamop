@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * Created by adambalogh.
  */
-public class ServiceWatcher implements Runnable {
+public class ServiceWatcher {
     private static final Logger log = Logger.getLogger(ServiceWatcher.class.getName());
 
     public interface Callback {
@@ -34,6 +34,8 @@ public class ServiceWatcher implements Runnable {
         }
     }
 
+    private final Timer timer;
+
     private final CatalogClient catalogClient;
     private final String serviceToWatch;
     private final Callback callback;
@@ -42,16 +44,20 @@ public class ServiceWatcher implements Runnable {
         this.catalogClient = consul.catalogClient();
         this.serviceToWatch = serviceToWatch;
         this.callback = callback;
+        this.timer = new Timer("ServiceWatcher Timer");
     }
 
     /*
      * Starts watching the given in a background thread. This method returns immediately.
      */
-    public void run() {
-        Timer timer = new Timer("ServiceWatcher timer");
-        ServiceFetchTask serviceFetchTask = new ServiceFetchTask();
+    public void start() {
         log.info("Starting ServiceWatcher timer thread");
-        timer.scheduleAtFixedRate(serviceFetchTask, 0l, TimeUnit.SECONDS.toMillis(5));
+        timer.scheduleAtFixedRate(new ServiceFetchTask(), 0l, TimeUnit.SECONDS.toMillis(5));
         log.info("ServiceWatcher timer thread stopped");
+    }
+
+    public void stop() {
+        log.info("Stopping ServiceWatcher");
+        timer.cancel();
     }
 }
