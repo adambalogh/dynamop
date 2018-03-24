@@ -3,7 +3,7 @@ package worker;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import worker.discovery.ConsulClient;
-import worker.discovery.EventListenerAdapter;
+import worker.ring.EventListenerAdapter;
 import worker.discovery.ServiceWatcher;
 import worker.ring.Ring;
 

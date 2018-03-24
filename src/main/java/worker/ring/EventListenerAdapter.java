@@ -1,9 +1,8 @@
-package worker.discovery;
+package worker.ring;
 
 import com.google.common.collect.Lists;
 import com.orbitz.consul.model.catalog.CatalogService;
-import worker.ring.Node;
-import worker.ring.Ring;
+import worker.discovery.ServiceWatcher;
 
 import java.util.List;
 
