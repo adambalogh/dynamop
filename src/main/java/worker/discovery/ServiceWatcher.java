@@ -53,7 +53,6 @@ public class ServiceWatcher {
     public void start() {
         log.info("Starting ServiceWatcher timer thread");
         timer.scheduleAtFixedRate(new ServiceFetchTask(), 0l, TimeUnit.SECONDS.toMillis(5));
-        log.info("ServiceWatcher timer thread stopped");
     }
 
     public void stop() {
