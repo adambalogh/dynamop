@@ -1,10 +1,13 @@
 package worker;
 
+import com.orbitz.consul.Consul;
+import com.orbitz.consul.ConsulException;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import worker.core.WorkerService;
 import worker.discovery.ConsulClient;
 import worker.discovery.ServiceWatcher;
+import worker.health.HealthCheckService;
 import worker.ring.EventListenerAdapter;
 import worker.ring.Ring;
 import worker.routing.RoutingWorkerService;
@@ -27,24 +30,29 @@ public class WorkerServer {
     private final String serviceId = UUID.randomUUID().toString();
 
     private final RoutingWorkerService workerService;
-
     private final ConsulClient consulClient;
     private final ServiceWatcher serviceWatcher;
     private final Thread serviceWatcherThread;
     private final Ring ring = new Ring();
 
-    public WorkerServer(int port) {
+    private final HealthCheckService healthCheckService;
+
+    public WorkerServer(int port, Consul consul) {
         this.port = port;
-        this.consulClient = new ConsulClient();
+        this.consulClient = new ConsulClient(consul);
         this.workerService = new RoutingWorkerService(serviceId, ring, new WorkerService());
         this.serviceWatcher = new ServiceWatcher(
-                SERVICE_NAME, new EventListenerAdapter(ring.newEventListener()));
+                consul,
+                SERVICE_NAME,
+                new EventListenerAdapter(ring.newEventListener()));
         this.serviceWatcherThread = new Thread(this.serviceWatcher);
+        this.healthCheckService = new HealthCheckService();
     }
 
     private void start() throws IOException {
         server = ServerBuilder.forPort(port)
                 .addService(workerService)
+                .addService(healthCheckService)
                 .build()
                 .start();
         logger.info("Server started, listening on " + port);
@@ -83,8 +91,16 @@ public class WorkerServer {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         int port = Integer.parseInt(args[0]);
-        final WorkerServer server = new WorkerServer(port);
 
+        Consul consul = null;
+        try {
+            consul = Consul.builder().build(); // connect to Consul on localhost
+        } catch (ConsulException ce) {
+            logger.warning("Failed to connect to Consul, terminating");
+            throw ce;
+        }
+
+        final WorkerServer server = new WorkerServer(port, consul);
         server.start();
         server.blockUntilShutdown();
     }

@@ -10,11 +10,6 @@ service Worker {
     rpc Set(SetRequest) returns (SetResponse) {}
 }
 
-service InternalWorker {
-    rpc Get(InternalGetRequest) returns (GetResponse) {}
-    rpc Set(InternalSetRequest) returns (SetResponse) {}
-}
-
 enum Status {
     OK = 0;
     FAILED = 1;
@@ -24,19 +19,9 @@ message GetRequest {
     string key = 1;
 }
 
-message InternalGetRequest {
-    GetRequest request = 1;
-    int32 hopCount = 2;
-}
-
 message GetResponse {
     Status status = 1;
     string value = 2;
-}
-
-message InternalSetRequest {
-    SetRequest request = 1;
-    int32 hopCount = 2;
 }
 
 message SetRequest {

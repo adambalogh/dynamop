@@ -2,6 +2,7 @@ package worker.discovery;
 
 import com.orbitz.consul.CatalogClient;
 import com.orbitz.consul.Consul;
+import com.orbitz.consul.ConsulException;
 import com.orbitz.consul.model.ConsulResponse;
 import com.orbitz.consul.model.catalog.CatalogService;
 
@@ -24,8 +25,12 @@ public class ServiceWatcher implements Runnable {
     private class ServiceFetchTask extends TimerTask {
         @Override
         public void run() {
-            ConsulResponse<List<CatalogService>> response = catalogClient.getService(serviceToWatch);
-            callback.onServices(response.getResponse());
+            try {
+                ConsulResponse<List<CatalogService>> response = catalogClient.getService(serviceToWatch);
+                callback.onServices(response.getResponse());
+            } catch (ConsulException e) {
+                log.warning("Failed to retrieve services from Consul");
+            }
         }
     }
 
@@ -33,8 +38,7 @@ public class ServiceWatcher implements Runnable {
     private final String serviceToWatch;
     private final Callback callback;
 
-    public ServiceWatcher(String serviceToWatch, Callback callback) {
-        Consul consul = Consul.builder().build();
+    public ServiceWatcher(Consul consul, String serviceToWatch, Callback callback) {
         this.catalogClient = consul.catalogClient();
         this.serviceToWatch = serviceToWatch;
         this.callback = callback;
@@ -45,6 +49,6 @@ public class ServiceWatcher implements Runnable {
         ServiceFetchTask serviceFetchTask = new ServiceFetchTask();
         log.info("Starting ServiceWatcher timer thread");
         timer.scheduleAtFixedRate(serviceFetchTask, 0l, TimeUnit.SECONDS.toMillis(5));
-        log.info("Finishing ServiceWatcher timer thread");
+        log.info("ServiceWatcher timer thread stopped");
     }
 }
