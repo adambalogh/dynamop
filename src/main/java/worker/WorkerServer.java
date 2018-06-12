@@ -12,7 +12,7 @@ import worker.ring.EventListenerAdapter;
 import worker.ring.Ring;
 import worker.routing.RoutingWorkerService;
 import worker.storage.DiskStorage;
-import worker.storage.MemoryStorage;
+import worker.storage.Cache;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -43,7 +43,7 @@ public class WorkerServer {
         this.consulClient = new ConsulClient(consul);
         this.workerService = new RoutingWorkerService(serviceId,
                 ring,
-                new WorkerService(new DiskStorage(new MemoryStorage())));
+                new WorkerService(new DiskStorage(new Cache())));
         this.serviceWatcher = new ServiceWatcher(
                 consul,
                 SERVICE_NAME,

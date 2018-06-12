@@ -3,7 +3,7 @@ package worker.storage;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class MemoryStorage {
+public class Cache {
     private final SortedMap<String, String> storage = new ConcurrentSkipListMap<>();
 
     public Optional<String> set(String key, String value) {
