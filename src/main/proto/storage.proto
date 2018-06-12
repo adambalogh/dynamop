@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package storage.file;
+
+message Index {
+    int64 num_entries = 1;
+    repeated EntryInfo entries = 2;
+}
+
+message EntryInfo {
+    int64 key_offset = 1;
+    int32 key_length = 2;
+}

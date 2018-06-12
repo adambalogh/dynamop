@@ -11,6 +11,8 @@ import worker.health.HealthCheckService;
 import worker.ring.EventListenerAdapter;
 import worker.ring.Ring;
 import worker.routing.RoutingWorkerService;
+import worker.storage.DiskStorage;
+import worker.storage.MemoryStorage;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -39,7 +41,9 @@ public class WorkerServer {
     public WorkerServer(int port, Consul consul) {
         this.port = port;
         this.consulClient = new ConsulClient(consul);
-        this.workerService = new RoutingWorkerService(serviceId, ring, new WorkerService());
+        this.workerService = new RoutingWorkerService(serviceId,
+                ring,
+                new WorkerService(new DiskStorage(new MemoryStorage())));
         this.serviceWatcher = new ServiceWatcher(
                 consul,
                 SERVICE_NAME,
@@ -91,7 +95,7 @@ public class WorkerServer {
     public static void main(String[] args) throws IOException, InterruptedException {
         int port = Integer.parseInt(args[0]);
 
-        Consul consul = null;
+        Consul consul;
         try {
             consul = Consul.builder().build(); // connect to Consul on localhost
         } catch (ConsulException ce) {
